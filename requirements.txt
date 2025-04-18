@@ -1,0 +1,6 @@
+PyMuPDF 
+nltk 
+openai 
+faiss-cpu 
+tqdm 
+numpy 
