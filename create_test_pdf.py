@@ -16,10 +16,10 @@ os.makedirs(output_dir, exist_ok=True)
 # PDF erstellen
 pdf = FPDF()
 pdf.add_page()
-pdf.set_font("Arial", size=12)
+pdf.set_font("Helvetica", size=12)
 
 for line in text.split("\n"):
-    pdf.multi_cell(0, 10, line)
+    pdf.multi_cell(0, 10, line, new_x="LMARGIN", new_y="NEXT")
 
 # PDF speichern
 pdf_path = os.path.join(output_dir, "test.pdf")

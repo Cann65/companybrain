@@ -2,7 +2,7 @@ import streamlit as st
 from pdf_parser import extract_pdf_chunks
 from embed_index import index_chunks_faiss
 from query_engine import answer_query
-import os
+from pathlib import Path
 import tempfile
 
 st.set_page_config(page_title="🧠 CompanyBrain", layout="centered")
@@ -28,42 +28,26 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.image("https://img.icons8.com/fluency/96/brain.png", width=80)
 st.title("🧠 CompanyBrain")
 st.caption("Dein lokaler KI-Assistent für PDF-Dokumente")
 st.markdown("---")
 
-# Upload
-uploaded_file = st.file_uploader("📤 PDF hochladen:", type=["pdf"])
-
+uploaded_file = st.file_uploader("PDF hochladen", type=["pdf"])
 if uploaded_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp:
-        tmp.write(uploaded_file.read())
-        tmp_path = tmp.name
-
-    st.success("✅ PDF erfolgreich hochgeladen.")
-
-    # Chunks extrahieren
-    with st.spinner("📚 Lese und zerlege die PDF..."):
-        chunks = extract_pdf_chunks(tmp_path)
-
-    # Index erstellen
-    with st.spinner("📊 Embedding & Indexierung läuft..."):
-        index_path = "data/index/ui_index"
-        index_chunks_faiss(chunks, index_path)
-
-    st.success("✅ Dokument verarbeitet!")
-
-    # Frage stellen
-    st.markdown("---")
-    st.subheader("💬 Frage an dein Dokument")
     user_question = st.text_input("Was möchtest du wissen?")
-
     if user_question:
-        with st.spinner("🔎 Analysiere..."):
-            answer = answer_query(user_question, index_path, index_path)
-        st.markdown("### 💡 Antwort:")
-        st.success(answer)
-
+        with tempfile.TemporaryDirectory() as directory:
+            uploaded_pdf = Path(directory) / "document.pdf"
+            uploaded_pdf.write_bytes(uploaded_file.getvalue())
+            with st.spinner("Lese und zerlege die PDF…"):
+                chunks = extract_pdf_chunks(str(uploaded_pdf))
+            if chunks:
+                with st.spinner("Suche relevante Abschnitte…"):
+                    index_path = str(Path(directory) / "index")
+                    index_chunks_faiss(chunks, index_path)
+                    answer = answer_query(user_question, index_path, index_path)
+                st.success(answer)
+            else:
+                st.info("Diese PDF enthält keinen extrahierbaren Text.")
 else:
-    st.info("⬆️ Lade eine PDF hoch, um loszulegen.")
+    st.info("Lade eine PDF hoch, um loszulegen.")

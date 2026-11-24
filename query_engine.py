@@ -1,5 +1,4 @@
 import faiss
-import numpy as np
 import json
 from llm_local import ask_local_llm  # lokale Antwortfunktion
 
@@ -17,11 +16,13 @@ def answer_query(query: str, index_path: str, metadata_path: str, top_k: int = 3
     query_vector = model.encode(query).reshape(1, -1).astype('float32')
 
     # Ähnliche Chunks suchen
-    distances, indices = index.search(query_vector, top_k)
+    _, indices = index.search(query_vector, top_k)
 
     # Chunks zusammenstellen
     relevant_chunks = []
     for idx in indices[0]:
+        if idx < 0:
+            continue
         meta = metadata[idx]
         snippet = meta.get("text_snippet", "")
         relevant_chunks.append(f"(Seite {meta['page']}) {snippet}")

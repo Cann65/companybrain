@@ -1,6 +1,7 @@
-PyMuPDF 
-nltk 
-openai 
-faiss-cpu 
-tqdm 
-numpy 
+PyMuPDF
+faiss-cpu
+tqdm
+numpy
+sentence-transformers
+streamlit
+fpdf2

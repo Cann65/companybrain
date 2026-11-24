@@ -1,4 +1,4 @@
-import fitz  
+import pymupdf as fitz
 import re
 
 def extract_pdf_chunks(pdf_path: str, chunk_size: int = 500) -> list:
@@ -10,6 +10,8 @@ def extract_pdf_chunks(pdf_path: str, chunk_size: int = 500) -> list:
         text = doc.load_page(page_num).get_text("text")
 
         
+        if not text.strip():
+            continue
         sentences = re.split(r'(?<=[.!?]) +', text)
 
         current_chunk = []
